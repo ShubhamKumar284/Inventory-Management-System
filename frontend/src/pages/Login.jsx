@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
 import { Package, Lock, Mail, User as UserIcon, ArrowRight, Sparkles, AlertTriangle } from 'lucide-react';
 
 const Login = () => {
@@ -11,7 +12,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login, register } = useAuth();
+  const { login, register, googleLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -186,6 +187,35 @@ const Login = () => {
                 </span>
               )}
             </button>
+            
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-slate-500">Or continue with</span>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  try {
+                    setIsLoading(true);
+                    await googleLogin(credentialResponse.credential);
+                    navigate(from, { replace: true });
+                  } catch (err) {
+                    setError('Google Sign-in failed. Please try again.');
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+                onError={() => {
+                  setError('Google Sign-in was unsuccessful.');
+                }}
+                useOneTap
+              />
+            </div>
           </form>
 
           {isLogin && (

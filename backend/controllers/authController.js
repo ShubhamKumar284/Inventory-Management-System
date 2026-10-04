@@ -1,6 +1,9 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 const { successResponse, errorResponse } = require('../utils/apiResponse');
+const { OAuth2Client } = require('google-auth-library');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -101,8 +104,55 @@ const getMe = async (req, res, next) => {
   }
 };
 
+// @desc    Auth user with Google
+// @route   POST /api/auth/google
+// @access  Public
+const googleAuth = async (req, res, next) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return errorResponse(res, 400, 'Please provide Google credential');
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    
+    const payload = ticket.getPayload();
+    const { email, name } = payload;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create user if they don't exist
+      // Generate a secure random password since they logged in with Google
+      const randomPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
+      user = await User.create({
+        name,
+        email,
+        password: randomPassword,
+        role: 'VIEWER' // Default role
+      });
+    }
+
+    return successResponse(res, 200, 'Login successful', {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id, user.role),
+    });
+
+  } catch (error) {
+    console.error('[AUTH] Google Auth Error:', error);
+    return errorResponse(res, 401, 'Invalid Google token');
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getMe,
+  googleAuth,
 };
