@@ -21,14 +21,21 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
+    const res = await api.post('/auth/login', { 
+      email: email ? email.trim().toLowerCase() : '', 
+      password 
+    });
     const userData = res.data.data;
     localStorage.setItem('userInfo', JSON.stringify(userData));
     setUser(userData);
   };
 
   const register = async (name, email, password) => {
-    const res = await api.post('/auth/register', { name, email, password });
+    const res = await api.post('/auth/register', { 
+      name: name ? name.trim() : '', 
+      email: email ? email.trim().toLowerCase() : '', 
+      password 
+    });
     const userData = res.data.data;
     localStorage.setItem('userInfo', JSON.stringify(userData));
     setUser(userData);
@@ -41,13 +48,38 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
   };
 
+  const forgotPassword = async (email) => {
+    const res = await api.post('/auth/forgot-password', { 
+      email: email ? email.trim().toLowerCase() : '' 
+    });
+    return res.data;
+  };
+
+  const resetPassword = async (email, resetCode, newPassword) => {
+    const res = await api.post('/auth/reset-password', {
+      email: email ? email.trim().toLowerCase() : '',
+      resetCode: resetCode ? resetCode.trim() : '',
+      newPassword
+    });
+    return res.data;
+  };
+
   const logout = () => {
     localStorage.removeItem('userInfo');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, googleLogin, loading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      register, 
+      googleLogin, 
+      forgotPassword, 
+      resetPassword, 
+      loading 
+    }}>
       {!loading && children}
     </AuthContext.Provider>
   );

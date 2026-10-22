@@ -2,14 +2,22 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  name: { type: String, required: true, trim: true },
+  email: { 
+    type: String, 
+    required: true, 
+    unique: true, 
+    trim: true, 
+    lowercase: true 
+  },
   password: { type: String, required: true },
   role: { 
     type: String, 
     enum: ['ADMIN', 'INVENTORY_MANAGER', 'VIEWER'], 
     default: 'VIEWER' 
-  }
+  },
+  resetPasswordToken: { type: String },
+  resetPasswordExpire: { type: Date }
 }, { timestamps: true });
 
 // Pre-save hook to hash password before saving
