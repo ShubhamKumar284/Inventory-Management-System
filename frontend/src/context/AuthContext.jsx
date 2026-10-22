@@ -64,6 +64,29 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   };
 
+  const updateUserProfile = async (profileData) => {
+    const res = await api.put('/auth/profile', profileData);
+    const updatedData = res.data.data;
+    const merged = { ...user, ...updatedData };
+    localStorage.setItem('userInfo', JSON.stringify(merged));
+    setUser(merged);
+    return res.data;
+  };
+
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await api.get('/auth/me');
+      const freshData = res.data.data;
+      if (freshData) {
+        const merged = { ...user, ...freshData };
+        localStorage.setItem('userInfo', JSON.stringify(merged));
+        setUser(merged);
+      }
+    } catch (err) {
+      console.warn('Could not fetch fresh user profile', err);
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('userInfo');
     setUser(null);
@@ -78,6 +101,8 @@ export const AuthProvider = ({ children }) => {
       googleLogin, 
       forgotPassword, 
       resetPassword, 
+      updateUserProfile,
+      fetchCurrentUser,
       loading 
     }}>
       {!loading && children}

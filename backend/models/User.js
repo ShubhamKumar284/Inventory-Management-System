@@ -16,6 +16,9 @@ const userSchema = new mongoose.Schema({
     enum: ['ADMIN', 'INVENTORY_MANAGER', 'VIEWER'], 
     default: 'VIEWER' 
   },
+  phone: { type: String, default: '' },
+  department: { type: String, default: 'Warehouse Operations' },
+  bio: { type: String, default: '' },
   resetPasswordToken: { type: String },
   resetPasswordExpire: { type: Date }
 }, { timestamps: true });

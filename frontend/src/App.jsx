@@ -11,6 +11,7 @@ import StockOut from './pages/StockOut';
 import Suppliers from './pages/Suppliers';
 import Warehouses from './pages/Warehouses';
 import Reports from './pages/Reports';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
               <Route path="suppliers" element={<Suppliers />} />
               <Route path="warehouses" element={<Warehouses />} />
               <Route path="reports" element={<Reports />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
           </Route>
 

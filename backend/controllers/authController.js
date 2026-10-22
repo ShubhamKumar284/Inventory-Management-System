@@ -84,6 +84,10 @@ const loginUser = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        phone: user.phone || '',
+        department: user.department || 'Warehouse Operations',
+        bio: user.bio || '',
+        createdAt: user.createdAt,
         token: generateToken(user._id, user.role),
       });
     } else {
@@ -240,6 +244,49 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateProfile = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return errorResponse(res, 404, 'User not found');
+    }
+
+    if (req.body.name) user.name = req.body.name.trim();
+    if (req.body.phone !== undefined) user.phone = req.body.phone.trim();
+    if (req.body.department !== undefined) user.department = req.body.department.trim();
+    if (req.body.bio !== undefined) user.bio = req.body.bio.trim();
+
+    // If new password is provided and valid, update it
+    if (req.body.password) {
+      if (req.body.password.length < 6) {
+        return errorResponse(res, 400, 'New password must be at least 6 characters long');
+      }
+      user.password = req.body.password;
+    }
+
+    const updatedUser = await user.save();
+
+    return successResponse(res, 200, 'Profile updated successfully', {
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      phone: updatedUser.phone || '',
+      department: updatedUser.department || 'Warehouse Operations',
+      bio: updatedUser.bio || '',
+      createdAt: updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt,
+      token: generateToken(updatedUser._id, updatedUser.role),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -247,4 +294,6 @@ module.exports = {
   googleAuth,
   forgotPassword,
   resetPassword,
+  updateProfile,
 };
+

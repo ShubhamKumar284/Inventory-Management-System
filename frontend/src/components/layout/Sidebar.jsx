@@ -97,24 +97,33 @@ const Sidebar = () => {
 
       {/* Current User Profile & Log Out */}
       <div className="p-3.5 border-t border-slate-900 space-y-2 bg-slate-950/60">
-        <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-between">
+        <Link
+          to="/profile"
+          className="p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-900 border border-slate-800/80 hover:border-blue-500/50 flex items-center justify-between group transition-all cursor-pointer shadow-xs"
+          title="Open Profile & Settings"
+        >
           <div className="flex items-center space-x-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm group-hover:scale-105 transition-transform">
               {user?.name?.charAt(0).toUpperCase() || 'A'}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-200 truncate">{user?.name || 'Administrator'}</p>
+              <p className="text-xs font-bold text-slate-200 group-hover:text-blue-400 transition-colors truncate">
+                {user?.name || 'Administrator'}
+              </p>
               <div className="flex items-center space-x-1">
                 <ShieldCheck size={11} className="text-emerald-400" />
                 <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">{user?.role || 'ADMIN'}</span>
               </div>
             </div>
           </div>
-        </div>
+          <span className="text-[10px] font-bold text-slate-500 group-hover:text-blue-400 transition-colors px-1.5 py-0.5 rounded bg-slate-800/60 group-hover:bg-blue-500/10">
+            Profile →
+          </span>
+        </Link>
 
         <button
           onClick={logout}
-          className="flex items-center justify-center space-x-2 w-full py-2 px-3 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all border border-transparent hover:border-rose-500/20"
+          className="flex items-center justify-center space-x-2 w-full py-2 px-3 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all border border-transparent hover:border-rose-500/20 cursor-pointer"
         >
           <LogOut size={14} />
           <span>Sign Out</span>
