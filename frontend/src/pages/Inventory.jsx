@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
 import Modal from '../components/common/Modal';
 import LoadingState from '../components/common/LoadingState';
 import EmptyState from '../components/common/EmptyState';
-import { Search, Plus, Edit, Trash2, Eye, Filter, RefreshCw, Download, Printer, QrCode } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Eye, Filter, RefreshCw, Download, Printer, QrCode, X } from 'lucide-react';
 import GenericFormModal from '../components/common/GenericFormModal';
 
 const Inventory = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlSearch = searchParams.get('search') || '';
+  const [searchTerm, setSearchTerm] = useState(urlSearch);
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState([]);
@@ -49,11 +54,14 @@ const Inventory = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   
   // Fetch products
-  const fetchProducts = async () => {
+  const fetchProducts = async (query = searchTerm) => {
     setLoading(true);
     try {
-      const res = await api.get('/products?limit=50');
-      setProducts(res.data.data.products);
+      const endpoint = query 
+        ? `/products?limit=50&search=${encodeURIComponent(query)}` 
+        : '/products?limit=50';
+      const res = await api.get(endpoint);
+      setProducts(res.data?.data?.products || res.data?.data || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -61,8 +69,20 @@ const Inventory = () => {
     }
   };
 
+  // Sync state if URL search param changes
   useEffect(() => {
-    fetchProducts();
+    setSearchTerm(urlSearch);
+  }, [urlSearch]);
+
+  // Debounced search execution
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchProducts(searchTerm);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
     const fetchDependencies = async () => {
       try {
         const [catRes, supRes, warRes] = await Promise.all([
@@ -151,9 +171,28 @@ const Inventory = () => {
             <Search size={18} className="text-slate-400 shrink-0" />
             <input 
               type="text"
+              value={searchTerm}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchTerm(val);
+                setSearchParams(val ? { search: val } : {});
+              }}
               placeholder="Search by SKU or Name..."
               className="bg-transparent border-none outline-none ml-3 w-full text-sm text-slate-700 placeholder-slate-400"
             />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm('');
+                  setSearchParams({});
+                }}
+                className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+                title="Clear search"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
           <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 w-full md:w-auto">
             <button className="flex items-center justify-center px-3 sm:px-4 py-2 sm:py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm flex-1 sm:flex-initial">

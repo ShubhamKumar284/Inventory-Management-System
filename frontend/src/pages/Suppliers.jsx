@@ -3,11 +3,12 @@ import Card from '../components/common/Card';
 import LoadingState from '../components/common/LoadingState';
 import EmptyState from '../components/common/EmptyState';
 import api from '../services/api';
-import { Truck, Plus, Search, Edit, Trash2, Mail, Phone, MapPin } from 'lucide-react';
+import { Truck, Plus, Search, Edit, Trash2, Mail, Phone, MapPin, X } from 'lucide-react';
 import GenericFormModal from '../components/common/GenericFormModal';
 
 const Suppliers = () => {
   const [suppliers, setSuppliers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState(null);
@@ -54,6 +55,17 @@ const Suppliers = () => {
     }
   };
 
+  const filteredSuppliers = suppliers.filter(s => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      s.name?.toLowerCase().includes(q) ||
+      s.email?.toLowerCase().includes(q) ||
+      s.contactPerson?.toLowerCase().includes(q) ||
+      s.address?.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div className="space-y-6 pb-8 animate-in fade-in zoom-in-95 duration-300">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -73,11 +85,27 @@ const Suppliers = () => {
         <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50">
            <div className="flex items-center bg-white rounded-xl px-4 py-2.5 w-full sm:w-[400px] border border-slate-200 focus-within:ring-4 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all shadow-sm">
              <Search size={18} className="text-slate-400 shrink-0" />
-             <input type="text" placeholder="Search suppliers by name or email..." className="bg-transparent border-none outline-none ml-3 w-full text-sm font-medium text-slate-700" />
+             <input 
+               type="text" 
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+               placeholder="Search suppliers by name or email..." 
+               className="bg-transparent border-none outline-none ml-3 w-full text-sm font-medium text-slate-700 placeholder-slate-400" 
+             />
+             {searchQuery && (
+               <button
+                 type="button"
+                 onClick={() => setSearchQuery('')}
+                 className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+                 title="Clear search"
+               >
+                 <X size={16} />
+               </button>
+             )}
            </div>
         </div>
 
-        {loading ? <LoadingState message="Loading supplier directory..." /> : suppliers.length > 0 ? (
+        {loading ? <LoadingState message="Loading supplier directory..." /> : filteredSuppliers.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[700px] text-sm text-left">
               <thead className="text-xs text-slate-500 bg-white uppercase border-b border-slate-200">
@@ -90,7 +118,7 @@ const Suppliers = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                {suppliers.map(s => (
+                {filteredSuppliers.map(s => (
                   <tr key={s._id} className="hover:bg-indigo-50/50 transition-colors group">
                     <td className="px-6 py-5">
                       <div className="flex items-center space-x-4">
