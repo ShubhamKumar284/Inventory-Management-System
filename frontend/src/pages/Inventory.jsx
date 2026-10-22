@@ -22,11 +22,35 @@ const Inventory = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
 
+  const handleCreateCategory = async (name) => {
+    try {
+      const res = await api.post('/categories', { name });
+      const newCat = res.data?.data;
+      if (newCat) {
+        setCategories(prev => {
+          if (prev.some(c => c._id === newCat._id)) return prev;
+          return [...prev, newCat];
+        });
+        return newCat._id;
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to create category');
+    }
+    return null;
+  };
+
   const productFields = [
     { name: 'sku', label: 'SKU', required: true },
     { name: 'name', label: 'Product Name', required: true },
     { name: 'description', label: 'Description', type: 'textarea', fullWidth: true },
-    { name: 'categoryId', label: 'Category', type: 'select', required: true, options: categories.map(c => ({ value: c._id, label: c.name })) },
+    { 
+      name: 'categoryId', 
+      label: 'Category', 
+      type: 'select', 
+      required: true, 
+      options: categories.map(c => ({ value: c._id, label: c.name })),
+      onCreateNew: handleCreateCategory 
+    },
     { name: 'unitCost', label: 'Unit Cost ($)', type: 'number', required: true },
     { name: 'quantity', label: 'Current Stock Quantity', type: 'number', required: true },
     { name: 'minimumStock', label: 'Minimum Stock Alert', type: 'number' },
@@ -35,12 +59,36 @@ const Inventory = () => {
     { name: 'imageUrl', label: 'Image URL (Optional)', fullWidth: true },
   ];
 
+  // Fetch categories, suppliers and warehouses for dropdowns
+  const fetchDependencies = async () => {
+    try {
+      const [catRes, supRes, warRes] = await Promise.allSettled([
+        api.get('/categories'),
+        api.get('/suppliers'),
+        api.get('/warehouses')
+      ]);
+      if (catRes.status === 'fulfilled' && catRes.value?.data?.data) {
+        setCategories(catRes.value.data.data);
+      }
+      if (supRes.status === 'fulfilled' && supRes.value?.data?.data) {
+        setSuppliers(supRes.value.data.data);
+      }
+      if (warRes.status === 'fulfilled' && warRes.value?.data?.data) {
+        setWarehouses(warRes.value.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to load form dependencies:', err);
+    }
+  };
+
   const openAddModal = () => {
+    fetchDependencies();
     setEditingProduct(null);
     setIsFormOpen(true);
   };
 
   const openEditModal = (product) => {
+    fetchDependencies();
     const editData = { ...product };
     if (product.categoryId) editData.categoryId = product.categoryId._id || product.categoryId;
     if (product.supplierId) editData.supplierId = product.supplierId._id || product.supplierId;
@@ -83,18 +131,6 @@ const Inventory = () => {
   }, [searchTerm]);
 
   useEffect(() => {
-    const fetchDependencies = async () => {
-      try {
-        const [catRes, supRes, warRes] = await Promise.all([
-          api.get('/categories'),
-          api.get('/suppliers'),
-          api.get('/warehouses')
-        ]);
-        setCategories(catRes.data.data || []);
-        setSuppliers(supRes.data.data || []);
-        setWarehouses(warRes.data.data || []);
-      } catch (err) { console.error(err); }
-    };
     fetchDependencies();
   }, []);
 

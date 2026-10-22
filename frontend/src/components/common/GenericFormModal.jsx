@@ -7,6 +7,9 @@ const GenericFormModal = ({ isOpen, onClose, title, fields, initialData, endpoin
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [creatingField, setCreatingField] = useState(null);
+  const [newOptionValue, setNewOptionValue] = useState('');
+  const [creatingLoading, setCreatingLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -20,6 +23,8 @@ const GenericFormModal = ({ isOpen, onClose, title, fields, initialData, endpoin
         setFormData(initial);
       }
       setError(null);
+      setCreatingField(null);
+      setNewOptionValue('');
     }
   }, [isOpen, initialData, fields]);
 
@@ -80,22 +85,97 @@ const GenericFormModal = ({ isOpen, onClose, title, fields, initialData, endpoin
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {fields.map(field => (
             <div key={field.name} className={`space-y-1 ${field.fullWidth ? 'md:col-span-2' : ''}`}>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{field.label}</label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">{field.label}</label>
+                {field.onCreateNew && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCreatingField(creatingField === field.name ? null : field.name);
+                      setNewOptionValue('');
+                    }}
+                    className="text-[11px] font-bold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                  >
+                    {creatingField === field.name ? 'Cancel' : `+ New ${field.label}`}
+                  </button>
+                )}
+              </div>
               
               {field.type === 'select' ? (
-                <select
-                  name={field.name}
-                  value={formData[field.name] || ''}
-                  onChange={handleChange}
-                  required={field.required}
-                  disabled={field.disabled}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
-                >
-                  <option value="">Select...</option>
-                  {field.options?.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                creatingField === field.name ? (
+                  <div className="flex items-center space-x-2 pt-0.5">
+                    <input
+                      type="text"
+                      placeholder={`Enter new ${field.label.toLowerCase()}...`}
+                      value={newOptionValue}
+                      onChange={(e) => setNewOptionValue(e.target.value)}
+                      onKeyDown={async (e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (!newOptionValue.trim()) return;
+                          setCreatingLoading(true);
+                          const newId = await field.onCreateNew(newOptionValue.trim());
+                          setCreatingLoading(false);
+                          if (newId) {
+                            setFormData(prev => ({ ...prev, [field.name]: newId }));
+                            setCreatingField(null);
+                            setNewOptionValue('');
+                          }
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-blue-400 rounded-xl bg-white text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      disabled={creatingLoading || !newOptionValue.trim()}
+                      onClick={async () => {
+                        if (!newOptionValue.trim()) return;
+                        setCreatingLoading(true);
+                        const newId = await field.onCreateNew(newOptionValue.trim());
+                        setCreatingLoading(false);
+                        if (newId) {
+                          setFormData(prev => ({ ...prev, [field.name]: newId }));
+                          setCreatingField(null);
+                          setNewOptionValue('');
+                        }
+                      }}
+                      className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shrink-0 transition-colors cursor-pointer"
+                    >
+                      {creatingLoading ? 'Adding...' : 'Add'}
+                    </button>
+                  </div>
+                ) : (
+                  <select
+                    name={field.name}
+                    value={formData[field.name] || ''}
+                    onChange={(e) => {
+                      if (e.target.value === '__CREATE_NEW__') {
+                        setCreatingField(field.name);
+                        setNewOptionValue('');
+                        return;
+                      }
+                      handleChange(e);
+                    }}
+                    required={field.required}
+                    disabled={field.disabled}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm"
+                  >
+                    <option value="">Select {field.label}...</option>
+                    {field.options && field.options.length > 0 ? (
+                      field.options.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))
+                    ) : (
+                      <option value="" disabled>No {field.label.toLowerCase()} found</option>
+                    )}
+                    {field.onCreateNew && (
+                      <option value="__CREATE_NEW__" className="font-bold text-blue-600 bg-blue-50">
+                        + Add New {field.label}...
+                      </option>
+                    )}
+                  </select>
+                )
               ) : field.type === 'textarea' ? (
                 <textarea
                   name={field.name}

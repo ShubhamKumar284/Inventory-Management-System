@@ -35,9 +35,33 @@ const connectDB = async () => {
     const conn = await mongoose.connect(process.env.MONGODB_URI);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     await ensureAdminUser();
+    await ensureDefaultCategories();
   } catch (error) {
     console.error(`MongoDB connection failed: ${error.message}`);
     process.exit(1); // Exit process with failure
+  }
+};
+
+const ensureDefaultCategories = async () => {
+  try {
+    const Category = require('../models/Category');
+    const count = await Category.countDocuments();
+    if (count === 0) {
+      const defaults = [
+        { name: 'Hardware & Steel', description: 'Metals, steel sheets, structural items' },
+        { name: 'Electronics', description: 'Computing, digital devices, and peripherals' },
+        { name: 'Raw Materials', description: 'Manufacturing components and industrial stock' },
+        { name: 'Office Supplies', description: 'Paper, stationery, and administration materials' },
+        { name: 'Furniture', description: 'Desks, warehouse racking, and ergonomic seating' },
+        { name: 'Tools & Equipment', description: 'Warehouse tools, machinery and maintenance items' },
+        { name: 'Automotive Parts', description: 'Vehicle parts, lubricants, and tires' },
+        { name: 'Clothing', description: 'Uniforms, protective gear, and textiles' }
+      ];
+      await Category.insertMany(defaults);
+      console.log(`[SEED] Initialized ${defaults.length} default categories.`);
+    }
+  } catch (error) {
+    console.error(`[SEED] Notice on categories verification: ${error.message}`);
   }
 };
 
