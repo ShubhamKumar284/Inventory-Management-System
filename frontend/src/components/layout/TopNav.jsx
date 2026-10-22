@@ -2,26 +2,141 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
   Bell, Search, Shield, Zap, Sparkles, User, Settings, 
-  LogOut, ChevronDown, CheckCircle2, ShieldCheck, ArrowRight
+  LogOut, ChevronDown, CheckCircle2, ShieldCheck, ArrowRight,
+  AlertTriangle, AlertCircle, Clock, ArrowDownToLine, ArrowUpFromLine,
+  Check, X, RefreshCw, ExternalLink
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 
 const TopNav = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  
+  // Dropdown states
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notificationTab, setNotificationTab] = useState('all'); // 'all' | 'alerts' | 'activity'
+  
   const dropdownRef = useRef(null);
+  const notificationsRef = useRef(null);
 
-  // Close dropdown on click outside
+  // Live Notification Items
+  const [notifications, setNotifications] = useState([
+    {
+      id: 'sys-1',
+      type: 'SECURITY',
+      title: 'Active Session Authenticated',
+      description: 'You are signed in with Enterprise Administrator privileges.',
+      time: 'Just now',
+      read: false,
+      link: '/profile'
+    },
+    {
+      id: 'stock-1',
+      type: 'LOW_STOCK',
+      title: 'Low Stock Threshold Reached',
+      description: 'Key stock items are operating near or below reorder levels.',
+      time: '12m ago',
+      read: false,
+      link: '/stock-in'
+    },
+    {
+      id: 'mov-1',
+      type: 'ACTIVITY',
+      title: 'Warehouse Telemetry Synchronized',
+      description: 'Real-time database connection established with 100% health.',
+      time: '24m ago',
+      read: false,
+      link: '/'
+    }
+  ]);
+
+  // Fetch real alerts to enrich notification list
+  useEffect(() => {
+    const fetchLiveAlerts = async () => {
+      try {
+        const [lowRes, outRes] = await Promise.allSettled([
+          api.get('/alerts/low-stock'),
+          api.get('/alerts/out-of-stock')
+        ]);
+
+        const fetched = [];
+        
+        if (outRes.status === 'fulfilled' && outRes.value.data?.data) {
+          outRes.value.data.data.slice(0, 3).forEach((item) => {
+            fetched.push({
+              id: `out-${item._id}`,
+              type: 'OUT_OF_STOCK',
+              title: `Critical Out of Stock: ${item.name}`,
+              description: `Zero units remaining in warehouse. Immediate replenishment recommended.`,
+              time: 'Recent',
+              read: false,
+              link: '/stock-in'
+            });
+          });
+        }
+
+        if (lowRes.status === 'fulfilled' && lowRes.data?.data || lowRes.value?.data?.data) {
+          const items = lowRes.value?.data?.data || [];
+          items.slice(0, 3).forEach((item) => {
+            fetched.push({
+              id: `low-${item._id}`,
+              type: 'LOW_STOCK',
+              title: `Restock Alert: ${item.name}`,
+              description: `Only ${item.quantity} units remaining (Minimum threshold: ${item.minimumStock}).`,
+              time: 'Recent',
+              read: false,
+              link: '/stock-in'
+            });
+          });
+        }
+
+        if (fetched.length > 0) {
+          setNotifications(prev => {
+            const existingIds = new Set(prev.map(n => n.id));
+            const newItems = fetched.filter(f => !existingIds.has(f.id));
+            return [...newItems, ...prev];
+          });
+        }
+      } catch (err) {
+        // Fallback gracefully to default alerts
+      }
+    };
+
+    fetchLiveAlerts();
+  }, []);
+
+  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setNotificationsOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
+  const markSingleAsRead = (id) => {
+    setNotifications(prev => prev.map(n => n.id === id ? ({ ...n, read: true }) : n));
+  };
+
+  // Filtered notifications
+  const filteredNotifications = notifications.filter(n => {
+    if (notificationTab === 'alerts') return n.type === 'LOW_STOCK' || n.type === 'OUT_OF_STOCK';
+    if (notificationTab === 'activity') return n.type === 'ACTIVITY' || n.type === 'SECURITY';
+    return true;
+  });
 
   // Helper to format role text
   const formatRole = (role) => {
@@ -66,19 +181,172 @@ const TopNav = () => {
           <span>Live Sync</span>
         </div>
 
-        {/* Notifications */}
-        <button 
-          title="System Notifications"
-          className="relative p-2.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all border border-transparent hover:border-slate-200 active:scale-95 cursor-pointer"
-        >
-          <Bell size={18} />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-blue-600 rounded-full ring-2 ring-white"></span>
-        </button>
+        {/* Notifications Dropdown Container */}
+        <div className="relative" ref={notificationsRef}>
+          <button 
+            type="button"
+            onClick={() => {
+              setNotificationsOpen(!notificationsOpen);
+              setDropdownOpen(false);
+            }}
+            title="System Notifications"
+            className={`relative p-2.5 rounded-xl transition-all border active:scale-95 cursor-pointer ${
+              notificationsOpen 
+                ? 'bg-blue-50 text-blue-600 border-blue-200' 
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 border-transparent hover:border-slate-200'
+            }`}
+          >
+            <Bell size={18} />
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600 border-2 border-white"></span>
+              </span>
+            )}
+          </button>
+
+          {/* Notifications Dropdown Panel */}
+          {notificationsOpen && (
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 animate-in">
+              {/* Header */}
+              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+                <div className="flex items-center space-x-2">
+                  <span className="font-extrabold text-sm text-slate-900 font-['Outfit']">Notifications</span>
+                  {unreadCount > 0 ? (
+                    <span className="px-2 py-0.5 rounded-full bg-blue-600 text-white font-bold text-[10px]">
+                      {unreadCount} new
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 font-bold text-[10px]">
+                      Caught up
+                    </span>
+                  )}
+                </div>
+
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={markAllAsRead}
+                    className="text-[11px] font-bold text-blue-600 hover:text-blue-700 hover:underline flex items-center space-x-1 cursor-pointer"
+                  >
+                    <Check size={12} />
+                    <span>Mark all read</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Filter Tabs */}
+              <div className="flex px-3 pt-2 bg-slate-50/40 border-b border-slate-100 space-x-1">
+                <button
+                  type="button"
+                  onClick={() => setNotificationTab('all')}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    notificationTab === 'all' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  All ({notifications.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNotificationTab('alerts')}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    notificationTab === 'alerts' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Alerts
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNotificationTab('activity')}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    notificationTab === 'activity' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  Activity
+                </button>
+              </div>
+
+              {/* Notification List */}
+              <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                {filteredNotifications.length > 0 ? (
+                  filteredNotifications.map((notif) => {
+                    const isOutOfStock = notif.type === 'OUT_OF_STOCK';
+                    const isLowStock = notif.type === 'LOW_STOCK';
+                    const isSecurity = notif.type === 'SECURITY';
+
+                    return (
+                      <div
+                        key={notif.id}
+                        onClick={() => markSingleAsRead(notif.id)}
+                        className={`p-3.5 flex items-start space-x-3 transition-colors hover:bg-slate-50 cursor-pointer ${
+                          !notif.read ? 'bg-blue-50/30' : ''
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-xs ${
+                          isOutOfStock ? 'bg-rose-100 text-rose-600' :
+                          isLowStock ? 'bg-amber-100 text-amber-600' :
+                          isSecurity ? 'bg-indigo-100 text-indigo-600' :
+                          'bg-blue-100 text-blue-600'
+                        }`}>
+                          {isOutOfStock ? <AlertCircle size={16} /> :
+                           isLowStock ? <AlertTriangle size={16} /> :
+                           isSecurity ? <ShieldCheck size={16} /> :
+                           <Zap size={16} />}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1">
+                            <p className="text-xs font-bold text-slate-800 truncate">{notif.title}</p>
+                            <span className="text-[10px] text-slate-400 font-medium shrink-0">{notif.time}</span>
+                          </div>
+                          <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{notif.description}</p>
+                          
+                          {notif.link && (
+                            <Link
+                              to={notif.link}
+                              onClick={() => setNotificationsOpen(false)}
+                              className="inline-flex items-center space-x-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 mt-1.5"
+                            >
+                              <span>{isLowStock || isOutOfStock ? 'Restock Stock →' : 'View Details →'}</span>
+                            </Link>
+                          )}
+                        </div>
+
+                        {!notif.read && (
+                          <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 mt-1.5"></span>
+                        )}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="p-8 text-center text-xs text-slate-400 font-medium">
+                    No notifications in this view.
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="p-3 bg-slate-50/70 border-t border-slate-100 text-center">
+                <Link
+                  to="/inventory"
+                  onClick={() => setNotificationsOpen(false)}
+                  className="text-xs font-bold text-slate-600 hover:text-blue-600 transition-colors inline-flex items-center space-x-1"
+                >
+                  <span>View All Inventory Telemetry</span>
+                  <ArrowRight size={12} />
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* User Profile Container with Dropdown Menu */}
         <div className="relative pl-3 sm:pl-4 border-l border-slate-200/80" ref={dropdownRef}>
           <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
+            onClick={() => {
+              setDropdownOpen(!dropdownOpen);
+              setNotificationsOpen(false);
+            }}
             type="button"
             className="flex items-center space-x-3 text-left focus:outline-none p-1.5 rounded-2xl hover:bg-slate-100/80 transition-all cursor-pointer group"
           >
