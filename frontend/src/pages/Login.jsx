@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { GoogleLogin } from '@react-oauth/google';
 import { 
   Package, Lock, Mail, User as UserIcon, ArrowRight, Sparkles, 
-  AlertTriangle, KeyRound, ShieldCheck, CheckCircle2, ArrowLeft, X 
+  AlertTriangle, KeyRound, ShieldCheck, CheckCircle2, ArrowLeft, X,
+  Eye, EyeOff, Boxes, Activity, Zap, TrendingUp, Shield
 } from 'lucide-react';
 
 const Login = () => {
@@ -12,6 +13,7 @@ const Login = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
@@ -26,7 +28,7 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-    setLoadingMessage(isLogin ? 'Authenticating...' : 'Creating your account...');
+    setLoadingMessage(isLogin ? 'Authenticating your session...' : 'Setting up your workspace...');
 
     try {
       if (isLogin) {
@@ -36,7 +38,7 @@ const Login = () => {
       }
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || 'Authentication failed. Please try again.');
+      setError(err.response?.data?.message || 'Authentication failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
@@ -56,13 +58,13 @@ const Login = () => {
     setPassword('password123');
     setError('');
     setIsLoading(true);
-    setLoadingMessage('Signing in as Administrator...');
+    setLoadingMessage('Logging in as System Administrator...');
 
     try {
       await login('admin@example.com', 'password123');
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.message || 'Admin login failed. Please ensure the backend is running.');
+      setError(err.response?.data?.message || 'Admin login failed. Please verify server connection.');
     } finally {
       setIsLoading(false);
       setLoadingMessage('');
@@ -76,6 +78,7 @@ const Login = () => {
   const [resetCode, setResetCode] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotError, setForgotError] = useState('');
   const [demoCode, setDemoCode] = useState('');
@@ -104,11 +107,11 @@ const Login = () => {
       const res = await forgotPassword(forgotEmail);
       if (res.data?.resetCode) {
         setDemoCode(res.data.resetCode);
-        setResetCode(res.data.resetCode); // Pre-populate for convenient testing
+        setResetCode(res.data.resetCode); // Pre-fill code for effortless testing
       }
       setForgotStep(2);
     } catch (err) {
-      setForgotError(err.response?.data?.message || 'Failed to request reset code. Please check email address.');
+      setForgotError(err.response?.data?.message || 'Failed to request reset code. Check if email is valid.');
     } finally {
       setForgotLoading(false);
     }
@@ -135,7 +138,6 @@ const Login = () => {
     try {
       await resetPassword(forgotEmail, resetCode, newPassword);
       setForgotStep(3);
-      // Pre-fill login credentials so user can log in immediately
       setEmail(forgotEmail);
       setPassword(newPassword);
     } catch (err) {
@@ -146,87 +148,176 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      {/* Left side - Decorative/Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative overflow-hidden items-center justify-center">
-        {/* Dynamic Background Gradients */}
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-600/20 to-purple-600/20 z-0"></div>
-        <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] rounded-full bg-blue-500/20 blur-[120px] mix-blend-screen"></div>
-        <div className="absolute bottom-[10%] -right-[20%] w-[60%] h-[60%] rounded-full bg-indigo-500/20 blur-[100px] mix-blend-screen"></div>
-        
-        {/* Decorative Grid */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvc3ZnPg==')] opacity-50"></div>
+    <div className="min-h-screen bg-slate-950 flex selection:bg-blue-600 selection:text-white">
+      {/* Left Showcase Side (Desktop) */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 items-center justify-center p-12 select-none border-r border-slate-800/60">
+        {/* Ambient Glowing Orbs */}
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-blue-600/25 rounded-full blur-[140px] animate-glow-pulse pointer-events-none"></div>
+        <div className="absolute bottom-10 right-0 w-80 h-80 bg-violet-600/20 rounded-full blur-[130px] animate-float-slow pointer-events-none"></div>
+        <div className="absolute -top-10 right-1/4 w-72 h-72 bg-emerald-500/15 rounded-full blur-[110px] pointer-events-none"></div>
 
-        <div className="relative z-10 w-full max-w-lg p-12 flex flex-col items-start">
-          <div className="flex items-center space-x-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-              <Package className="text-white" size={24} />
+        {/* Subtle Geometric Grid */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/10 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b0f_1px,transparent_1px),linear-gradient(to_bottom,#1e293b0f_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+
+        <div className="relative z-10 w-full max-w-lg space-y-10">
+          {/* Brand Identity */}
+          <div className="flex items-center space-x-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-500 flex items-center justify-center shadow-xl shadow-blue-500/30 border border-white/20">
+              <Package className="text-white" size={26} />
             </div>
-            <h1 className="text-3xl font-bold text-white">Smart<span className="text-blue-400">Inventory</span></h1>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-2xl font-black tracking-tight text-white font-['Outfit']">Smart<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">Inventory</span></span>
+                <span className="px-2 py-0.5 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[10px] font-bold uppercase tracking-wider">v2.0</span>
+              </div>
+              <p className="text-xs text-slate-400 font-medium">Enterprise Supply Chain & Warehouse OS</p>
+            </div>
           </div>
-          <h2 className="text-5xl font-extrabold text-white leading-tight mb-6">
-            The intelligent way to manage your stock.
-          </h2>
-          <p className="text-slate-400 text-lg mb-12">
-            Streamline your operations, prevent stockouts, and gain real-time visibility into your supply chain with our enterprise-grade management system.
-          </p>
-          
-          <div className="flex space-x-4 items-center">
-            <div className="flex -space-x-4">
-              <img className="w-12 h-12 rounded-full border-4 border-slate-900 object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" alt="User 1" />
-              <img className="w-12 h-12 rounded-full border-4 border-slate-900 object-cover" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=100&q=80" alt="User 2" />
-              <img className="w-12 h-12 rounded-full border-4 border-slate-900 object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="User 3" />
+
+          {/* Value Prop Headline */}
+          <div className="space-y-4">
+            <h1 className="text-4xl xl:text-5xl font-black text-white leading-[1.15] tracking-tight font-['Outfit']">
+              Intelligent inventory telemetry for <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-300">modern logistics</span>.
+            </h1>
+            <p className="text-slate-400 text-base leading-relaxed">
+              Track thousands of SKUs across multi-regional distribution hubs in real time. Prevent costly stockouts with automated reordering and predictive analytics.
+            </p>
+          </div>
+
+          {/* Interactive Feature Showcase Cards */}
+          <div className="space-y-3 pt-2">
+            {/* Card 1 */}
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md flex items-center justify-between hover:border-slate-700/80 transition-all group">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <Activity size={20} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-white group-hover:text-blue-300 transition-colors">Real-time Stock Dispatch</h4>
+                  <p className="text-xs text-slate-400">Sub-second sync with FIFO / LIFO cost calculations</p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-bold">
+                Live
+              </span>
             </div>
-            <div className="text-sm">
-              <div className="text-white font-medium">Trusted by teams</div>
-              <div className="text-slate-400">across 50+ countries</div>
+
+            {/* Card 2 */}
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md flex items-center justify-between hover:border-slate-700/80 transition-all group">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">Enterprise RBAC & Auditing</h4>
+                  <p className="text-xs text-slate-400">Role-based controls & tamper-proof transaction log</p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[11px] font-bold">
+                SOC-2
+              </span>
+            </div>
+          </div>
+
+          {/* Social Proof Stats */}
+          <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+            <div>
+              <p className="text-2xl font-black text-white font-['Outfit']">99.98%</p>
+              <p className="text-xs text-slate-400 font-medium">Fulfillment Accuracy</p>
+            </div>
+            <div className="h-8 w-px bg-slate-800"></div>
+            <div>
+              <p className="text-2xl font-black text-white font-['Outfit']">&lt; 150ms</p>
+              <p className="text-xs text-slate-400 font-medium">Global API Latency</p>
+            </div>
+            <div className="h-8 w-px bg-slate-800"></div>
+            <div>
+              <p className="text-2xl font-black text-white font-['Outfit']">140+</p>
+              <p className="text-xs text-slate-400 font-medium">Hubs Connected</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Right side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-white relative">
-        {/* Mobile Logo (hidden on desktop) */}
-        <div className="absolute top-8 left-8 flex items-center space-x-2 lg:hidden">
-           <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center shadow-md shadow-blue-500/20">
-              <Package className="text-white" size={16} />
-           </div>
-           <h1 className="text-xl font-bold text-slate-900">Smart<span className="text-blue-500">Inventory</span></h1>
-        </div>
+      {/* Right Form Side */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 lg:p-16 bg-slate-50 relative min-h-screen">
+        {/* Subtle Background Accent */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div className="w-full max-w-md">
-          <div className="mb-10">
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">
-              {isLogin ? 'Welcome back' : 'Create an account'}
+        <div className="w-full max-w-md space-y-8 animate-in relative z-10">
+          
+          {/* Header & Tabs */}
+          <div>
+            {/* Mobile Brand Header */}
+            <div className="flex items-center space-x-2.5 mb-6 lg:hidden">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+                <Package size={22} />
+              </div>
+              <div>
+                <h2 className="text-xl font-black text-slate-900 font-['Outfit']">Smart<span className="text-blue-600">Inventory</span></h2>
+                <p className="text-[10px] text-slate-500 font-bold tracking-wider uppercase">Enterprise v2.0</p>
+              </div>
+            </div>
+
+            {/* Mode Toggle Switcher */}
+            <div className="flex bg-slate-200/80 p-1 rounded-xl mb-6 border border-slate-300/60 shadow-xs">
+              <button
+                type="button"
+                onClick={() => { setIsLogin(true); setError(''); }}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                  isLogin 
+                    ? 'bg-white text-slate-900 shadow-sm' 
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setIsLogin(false); setError(''); }}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+                  !isLogin 
+                    ? 'bg-white text-slate-900 shadow-sm' 
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                Create Account
+              </button>
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-['Outfit']">
+              {isLogin ? 'Welcome back' : 'Get started with SmartInventory'}
             </h2>
-            <p className="text-slate-500 text-sm">
+            <p className="text-slate-500 text-sm mt-1.5 font-medium">
               {isLogin 
-                ? 'Enter your credentials to access your dashboard.' 
-                : 'Sign up to start managing your inventory today.'}
+                ? 'Enter your credentials to access your warehouse dashboard.' 
+                : 'Create your administrator or staff account in seconds.'}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-start space-x-3 text-rose-600 animate-in fade-in slide-in-from-top-2">
-                <AlertTriangle size={20} className="shrink-0 mt-0.5" />
-                <span className="text-sm font-medium">{error}</span>
+              <div className="p-3.5 bg-rose-50 border border-rose-200/90 rounded-xl flex items-start space-x-2.5 text-rose-700 text-xs sm:text-sm animate-in shadow-xs">
+                <AlertTriangle size={18} className="shrink-0 mt-0.5 text-rose-600" />
+                <span className="font-semibold leading-relaxed">{error}</span>
               </div>
             )}
 
             {isLoading && loadingMessage && (
-              <div className="p-3.5 bg-blue-50 border border-blue-200/80 rounded-xl flex items-center justify-center space-x-2 text-blue-700 text-sm font-medium animate-pulse shadow-sm">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-center space-x-2 text-blue-700 text-xs sm:text-sm font-semibold animate-pulse shadow-xs">
                 <div className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin shrink-0"></div>
                 <span>{loadingMessage}</span>
               </div>
             )}
 
+            {/* Name input for Sign Up */}
             {!isLogin && (
-              <div className="space-y-1">
-                <label className="text-sm font-medium text-slate-700">Full Name</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Full Name</label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
                     <UserIcon size={18} />
                   </div>
                   <input
@@ -234,18 +325,19 @@ const Login = () => {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all sm:text-sm"
-                    placeholder="John Doe"
+                    className="block w-full pl-10 pr-4 py-2.5 sm:py-3 border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 transition-all text-sm font-medium shadow-xs"
+                    placeholder="Jane Doe"
                     autoComplete="name"
                   />
                 </div>
               </div>
             )}
 
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-slate-700">Email Address</label>
+            {/* Email Input */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Work Email</label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
                   <Mail size={18} />
                 </div>
                 <input
@@ -253,73 +345,85 @@ const Login = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all sm:text-sm"
+                  className="block w-full pl-10 pr-4 py-2.5 sm:py-3 border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 transition-all text-sm font-medium shadow-xs"
                   placeholder="name@company.com"
                   autoComplete="username"
                 />
               </div>
             </div>
 
-            <div className="space-y-1">
+            {/* Password Input */}
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-slate-700">Password</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700">Password</label>
                 {isLogin && (
                   <button 
                     type="button" 
                     onClick={openForgotPasswordModal}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-500 hover:underline transition-colors focus:outline-none"
+                    className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors focus:outline-none"
                   >
                     Forgot password?
                   </button>
                 )}
               </div>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
                   <Lock size={18} />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all sm:text-sm"
+                  className="block w-full pl-10 pr-11 py-2.5 sm:py-3 border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 transition-all text-sm font-medium shadow-xs"
                   placeholder="••••••••"
                   autoComplete={isLogin ? "current-password" : "new-password"}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-md shadow-blue-500/20 overflow-hidden"
+              className="w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 focus:outline-none focus:ring-4 focus:ring-blue-500/25 transition-all shadow-md shadow-blue-500/25 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed group cursor-pointer"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
-                <span className="flex items-center space-x-2">
-                  <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+                <>
+                  <span>{isLogin ? 'Sign In to Workspace' : 'Create Free Account'}</span>
                   <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </span>
+                </>
               )}
             </button>
-            
-            <div className="relative my-6">
+
+            {/* Divider */}
+            <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200" />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-slate-500 font-medium">Or continue with</span>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-3 bg-slate-50 text-slate-400 font-semibold uppercase tracking-wider">or sign in with</span>
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center space-y-2">
+            {/* Google OAuth Button */}
+            <div className="flex justify-center">
               <div className={isLoading ? 'opacity-50 pointer-events-none' : ''}>
                 <GoogleLogin
                   onSuccess={async (credentialResponse) => {
                     try {
                       setIsLoading(true);
-                      setLoadingMessage('Verifying Google credentials & signing in...');
+                      setLoadingMessage('Validating Google authentication...');
                       setError('');
                       await googleLogin(credentialResponse.credential);
                       navigate(from, { replace: true });
@@ -331,7 +435,7 @@ const Login = () => {
                     }
                   }}
                   onError={() => {
-                    setError('Google Sign-in was cancelled or encountered an error.');
+                    setError('Google Sign-in was cancelled or encountered an issue.');
                   }}
                   useOneTap
                 />
@@ -339,82 +443,84 @@ const Login = () => {
             </div>
           </form>
 
+          {/* Quick Demo Evaluation Section */}
           {isLogin && (
-            <div className="mt-8">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200" />
+            <div className="pt-2">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50/60 border border-amber-200/90 shadow-sm space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="p-1 rounded-md bg-amber-500 text-white shadow-xs">
+                      <Sparkles size={14} />
+                    </span>
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-900">Instant Admin Demo Access</span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-800">
+                    Pre-seeded
+                  </span>
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-3 bg-white text-xs font-semibold uppercase tracking-wider text-slate-400">For evaluation purposes</span>
+
+                <p className="text-xs text-amber-900/80 leading-relaxed">
+                  Test the complete platform with pre-configured inventory, low-stock alerts, and full admin permissions without typing.
+                </p>
+
+                <div className="pt-1 flex flex-col sm:flex-row gap-2">
+                  <button
+                    onClick={handleQuickAdminLogin}
+                    disabled={isLoading}
+                    type="button"
+                    className="flex-1 flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 transition-all shadow-xs active:scale-[0.99] disabled:opacity-60 cursor-pointer"
+                  >
+                    <Zap size={14} className="fill-white" />
+                    <span>1-Click Admin Login</span>
+                  </button>
+
+                  <button
+                    onClick={fillDefaultCredentials}
+                    disabled={isLoading}
+                    type="button"
+                    className="py-2.5 px-3 rounded-xl text-xs font-bold text-amber-900 hover:bg-amber-100/80 border border-amber-300 transition-all active:scale-[0.99] cursor-pointer"
+                  >
+                    Autofill Credentials
+                  </button>
                 </div>
-              </div>
-              
-              <div className="mt-5 space-y-2">
-                <button
-                  onClick={handleQuickAdminLogin}
-                  disabled={isLoading}
-                  type="button"
-                  className="w-full flex items-center justify-center space-x-2 py-3 px-4 border border-amber-300 rounded-xl text-sm font-semibold text-amber-900 bg-gradient-to-r from-amber-50 to-amber-100/80 hover:from-amber-100 hover:to-amber-200/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all shadow-sm active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  <Sparkles size={16} className="text-amber-600 fill-amber-500" />
-                  <span>⚡ 1-Click Demo Admin Login</span>
-                </button>
-                
-                <button
-                  onClick={fillDefaultCredentials}
-                  disabled={isLoading}
-                  type="button"
-                  className="w-full text-center py-1.5 text-xs font-medium text-slate-500 hover:text-blue-600 transition-colors"
-                >
-                  Or autofill credentials into form above
-                </button>
               </div>
             </div>
           )}
 
-          <div className="mt-10 text-center text-sm text-slate-600">
-            {isLogin ? "Don't have an account? " : "Already have an account? "}
-            <button 
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setError('');
-              }} 
-              className="font-semibold text-blue-600 hover:text-blue-500 hover:underline transition-all"
-            >
-              {isLogin ? 'Sign up' : 'Log in'}
-            </button>
-          </div>
+          {/* Footer Terms */}
+          <p className="text-center text-xs text-slate-400">
+            Protected by enterprise encryption & automated audit trail.
+          </p>
         </div>
       </div>
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in">
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-100/80 border border-blue-200 flex items-center justify-center text-blue-600 shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-xs">
                   <KeyRound size={20} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">
+                  <h3 className="text-lg font-extrabold text-slate-900 font-['Outfit']">
                     {forgotStep === 1 && 'Reset Password'}
-                    {forgotStep === 2 && 'Enter Reset Code'}
-                    {forgotStep === 3 && 'Password Changed!'}
+                    {forgotStep === 2 && 'Enter Verification Code'}
+                    {forgotStep === 3 && 'Password Updated!'}
                   </h3>
-                  <p className="text-xs text-slate-500">
-                    {forgotStep === 1 && 'Enter your registered email to get a code'}
-                    {forgotStep === 2 && 'Verify code & choose a new password'}
-                    {forgotStep === 3 && 'Your credentials have been updated'}
+                  <p className="text-xs text-slate-500 font-medium">
+                    {forgotStep === 1 && 'Step 1 of 3: Provide registered work email'}
+                    {forgotStep === 2 && 'Step 2 of 3: Verify code & create new password'}
+                    {forgotStep === 3 && 'Step 3 of 3: Complete & return to sign in'}
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowForgotModal(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
               >
                 <X size={18} />
               </button>
@@ -423,21 +529,21 @@ const Login = () => {
             {/* Modal Body */}
             <div className="p-6">
               {forgotError && (
-                <div className="mb-4 p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-start space-x-2.5 text-rose-600 text-xs sm:text-sm animate-in fade-in">
-                  <AlertTriangle size={18} className="shrink-0 mt-0.5" />
-                  <span className="font-medium">{forgotError}</span>
+                <div className="mb-4 p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-start space-x-2 text-rose-700 text-xs font-semibold animate-in">
+                  <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                  <span>{forgotError}</span>
                 </div>
               )}
 
               {/* STEP 1: Enter Email */}
               {forgotStep === 1 && (
                 <form onSubmit={handleRequestCode} className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      Account Email Address
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                      Work Email Address
                     </label>
                     <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
                         <Mail size={18} />
                       </div>
                       <input
@@ -445,8 +551,8 @@ const Login = () => {
                         required
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all text-sm"
-                        placeholder="name@company.com"
+                        className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 text-sm font-medium"
+                        placeholder="admin@example.com"
                         autoFocus
                       />
                     </div>
@@ -456,19 +562,19 @@ const Login = () => {
                     <button
                       type="button"
                       onClick={() => setShowForgotModal(false)}
-                      className="flex-1 py-2.5 px-4 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                      className="flex-1 py-2.5 px-4 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={forgotLoading}
-                      className="flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-70 flex items-center justify-center space-x-2 shadow-md shadow-blue-500/20"
+                      className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-70 flex items-center justify-center space-x-2 shadow-md shadow-blue-500/20 cursor-pointer"
                     >
                       {forgotLoading ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                       ) : (
-                        <span>Send Code →</span>
+                        <span>Generate Reset Code →</span>
                       )}
                     </button>
                   </div>
@@ -482,20 +588,20 @@ const Login = () => {
                     <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs flex items-center justify-between">
                       <div>
                         <span className="font-bold">Evaluation Demo Code: </span>
-                        <span className="font-mono font-black text-sm text-amber-700 bg-white px-2 py-0.5 rounded border border-amber-200 ml-1">
+                        <span className="font-mono font-black text-sm text-amber-800 bg-white px-2 py-0.5 rounded border border-amber-200 ml-1">
                           {demoCode}
                         </span>
                       </div>
-                      <span className="text-[10px] text-amber-600 font-medium">Valid 15m</span>
+                      <span className="text-[10px] text-amber-600 font-bold uppercase">Expires 15m</span>
                     </div>
                   )}
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-600">
-                      6-Digit Verification Code
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                      6-Digit Security Code
                     </label>
                     <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
                         <ShieldCheck size={18} />
                       </div>
                       <input
@@ -504,38 +610,45 @@ const Login = () => {
                         maxLength={6}
                         value={resetCode}
                         onChange={(e) => setResetCode(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white font-mono tracking-widest text-base font-bold transition-all text-center"
+                        className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-900 font-mono tracking-widest text-base font-bold text-center focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600"
                         placeholder="123456"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-600">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
                       New Password
                     </label>
                     <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
                         <Lock size={18} />
                       </div>
                       <input
-                        type="password"
+                        type={showNewPassword ? 'text' : 'password'}
                         required
                         minLength={6}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all text-sm"
-                        placeholder="At least 6 characters"
+                        className="block w-full pl-10 pr-10 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 text-sm font-medium"
+                        placeholder="Min 6 characters"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                      >
+                        {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-600">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
                       Confirm New Password
                     </label>
                     <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-600 transition-colors">
                         <Lock size={18} />
                       </div>
                       <input
@@ -544,8 +657,8 @@ const Login = () => {
                         minLength={6}
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all text-sm"
-                        placeholder="Re-enter password"
+                        className="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl bg-white text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-600 text-sm font-medium"
+                        placeholder="Re-type password"
                       />
                     </div>
                   </div>
@@ -554,7 +667,7 @@ const Login = () => {
                     <button
                       type="button"
                       onClick={() => setForgotStep(1)}
-                      className="py-2.5 px-3 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors flex items-center space-x-1"
+                      className="py-2.5 px-3.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors flex items-center space-x-1 cursor-pointer"
                     >
                       <ArrowLeft size={16} />
                       <span>Back</span>
@@ -562,12 +675,12 @@ const Login = () => {
                     <button
                       type="submit"
                       disabled={forgotLoading}
-                      className="flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-70 flex items-center justify-center space-x-2 shadow-md shadow-blue-500/20"
+                      className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-70 flex items-center justify-center space-x-2 shadow-md shadow-blue-500/20 cursor-pointer"
                     >
                       {forgotLoading ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                       ) : (
-                        <span>Reset Password</span>
+                        <span>Save & Update Password</span>
                       )}
                     </button>
                   </div>
@@ -577,21 +690,21 @@ const Login = () => {
               {/* STEP 3: Success Screen */}
               {forgotStep === 3 && (
                 <div className="text-center py-4 space-y-4">
-                  <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500 mx-auto shadow-sm">
+                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-xs">
                     <CheckCircle2 size={32} />
                   </div>
                   <div>
-                    <h4 className="text-base font-bold text-slate-900">Password Changed!</h4>
-                    <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
-                      Your password has been successfully reset. We have pre-filled your new credentials in the sign-in form.
+                    <h4 className="text-base font-extrabold text-slate-900 font-['Outfit']">Password Updated!</h4>
+                    <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto font-medium">
+                      Your new password is now active. Your sign-in form has been automatically populated with the new credentials.
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(false)}
-                    className="w-full py-2.5 px-4 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-md shadow-blue-500/20"
+                    className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-md shadow-blue-500/20 cursor-pointer"
                   >
-                    Back to Sign In
+                    Proceed to Sign In
                   </button>
                 </div>
               )}
@@ -604,3 +717,4 @@ const Login = () => {
 };
 
 export default Login;
+
