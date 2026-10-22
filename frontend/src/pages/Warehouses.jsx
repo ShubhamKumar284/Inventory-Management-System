@@ -55,15 +55,15 @@ const Warehouses = () => {
 
   return (
     <div className="space-y-6 pb-8 animate-in fade-in zoom-in-95 duration-300">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 flex items-center tracking-tight">
-            <Warehouse className="mr-3 text-emerald-600" size={32} strokeWidth={2.5} /> 
+            <Warehouse className="mr-3 text-emerald-600 shrink-0" size={32} strokeWidth={2.5} /> 
             Warehouse Facilities
           </h1>
           <p className="text-slate-500 mt-1 font-medium">Manage physical storage locations and track capacities.</p>
         </div>
-        <button onClick={openAddModal} className="flex items-center px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-bold shadow-sm shadow-emerald-200 hover:bg-emerald-700 active:scale-95 transition-all">
+        <button onClick={openAddModal} className="flex items-center justify-center px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-bold shadow-sm shadow-emerald-200 hover:bg-emerald-700 active:scale-95 transition-all self-start sm:self-auto">
           <Plus size={18} className="mr-2" strokeWidth={3} /> Add Warehouse
         </button>
       </div>
@@ -85,9 +85,9 @@ const Warehouses = () => {
                     className="w-full h-full object-cover"
                     onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(w.name)}&background=random&size=400` }}
                   />
-                  <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-sm">
-                    <button onClick={() => openEditModal(w)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md"><Edit size={16} strokeWidth={2.5} /></button>
-                    <button onClick={() => handleDelete(w._id)} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md"><Trash2 size={16} strokeWidth={2.5} /></button>
+                  <div className="absolute top-3 right-3 flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm rounded-lg p-1 shadow-sm">
+                    <button onClick={() => openEditModal(w)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md" title="Edit"><Edit size={16} strokeWidth={2.5} /></button>
+                    <button onClick={() => handleDelete(w._id)} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-md" title="Delete"><Trash2 size={16} strokeWidth={2.5} /></button>
                   </div>
                 </div>
                 <div className="p-6 flex flex-col flex-1">

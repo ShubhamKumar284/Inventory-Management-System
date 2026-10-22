@@ -226,11 +226,11 @@ const Profile = () => {
       )}
 
       {/* Tab Navigation */}
-      <div className="flex items-center space-x-2 border-b border-slate-200 pb-px">
+      <div className="flex items-center space-x-2 border-b border-slate-200 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
         <button
           type="button"
           onClick={() => setActiveTab('general')}
-          className={`flex items-center space-x-2 px-5 py-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+          className={`flex items-center space-x-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'general'
               ? 'border-blue-600 text-blue-600 bg-blue-50/40 rounded-t-xl'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -243,7 +243,7 @@ const Profile = () => {
         <button
           type="button"
           onClick={() => setActiveTab('permissions')}
-          className={`flex items-center space-x-2 px-5 py-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+          className={`flex items-center space-x-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'permissions'
               ? 'border-blue-600 text-blue-600 bg-blue-50/40 rounded-t-xl'
               : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -256,7 +256,7 @@ const Profile = () => {
         <button
           type="button"
           onClick={() => setActiveTab('security')}
-          className={`flex items-center space-x-2 px-5 py-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+          className={`flex items-center space-x-2 px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'security'
               ? 'border-blue-600 text-blue-600 bg-blue-50/40 rounded-t-xl'
               : 'border-transparent text-slate-500 hover:text-slate-800'

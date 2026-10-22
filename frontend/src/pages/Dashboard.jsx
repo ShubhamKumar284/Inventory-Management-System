@@ -163,7 +163,7 @@ const Dashboard = () => {
       </div>
 
       {/* 5-Card KPI Matrix */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5">
         
         {/* 1. Total Products */}
         <Link to="/inventory" className="block group">
@@ -484,7 +484,7 @@ const Dashboard = () => {
 
           <div className="overflow-x-auto flex-1">
             {filteredMovements && filteredMovements.length > 0 ? (
-              <table className="w-full text-left border-collapse">
+              <table className="w-full min-w-[550px] text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     <th className="px-6 py-3.5">Action & Performer</th>

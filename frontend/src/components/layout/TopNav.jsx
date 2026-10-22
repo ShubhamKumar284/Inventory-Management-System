@@ -4,12 +4,12 @@ import {
   Bell, Search, Shield, Zap, Sparkles, User, Settings, 
   LogOut, ChevronDown, CheckCircle2, ShieldCheck, ArrowRight,
   AlertTriangle, AlertCircle, Clock, ArrowDownToLine, ArrowUpFromLine,
-  Check, X, RefreshCw, ExternalLink
+  Check, X, RefreshCw, ExternalLink, Menu
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 
-const TopNav = () => {
+const TopNav = ({ onToggleSidebar }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   
@@ -155,23 +155,36 @@ const TopNav = () => {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-slate-200/80 h-16 flex items-center justify-between px-6 lg:px-8 shrink-0 transition-all">
-      {/* Search Bar with Keyboard Shortcut */}
-      <div className="flex items-center bg-slate-100/80 hover:bg-slate-100 rounded-xl px-3.5 py-2 w-72 sm:w-96 border border-slate-200/60 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-500/10 transition-all shadow-xs">
-        <Search size={16} className="text-slate-400 shrink-0" />
-        <input 
-          type="text"
-          placeholder="Search products, SKUs, warehouses..."
-          className="bg-transparent border-none outline-none ml-2.5 w-full text-xs sm:text-sm text-slate-800 placeholder-slate-400 font-medium"
-        />
-        <kbd className="hidden sm:inline-flex items-center space-x-0.5 px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-400 bg-white rounded border border-slate-200 shadow-2xs">
-          <span>Ctrl</span>
-          <span>K</span>
-        </kbd>
+    <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-slate-200/80 h-16 flex items-center justify-between px-3 sm:px-6 lg:px-8 shrink-0 transition-all">
+      {/* Left: Mobile Menu Toggle + Search */}
+      <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0 pr-2">
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+          aria-label="Toggle mobile menu"
+          title="Open menu"
+        >
+          <Menu size={22} />
+        </button>
+
+        {/* Search Bar with Keyboard Shortcut */}
+        <div className="flex items-center bg-slate-100/80 hover:bg-slate-100 rounded-xl px-3 sm:px-3.5 py-2 w-full max-w-[190px] xs:max-w-xs sm:max-w-sm md:w-80 lg:w-96 border border-slate-200/60 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-500/10 transition-all shadow-xs">
+          <Search size={16} className="text-slate-400 shrink-0" />
+          <input 
+            type="text"
+            placeholder="Search products..."
+            className="bg-transparent border-none outline-none ml-2 w-full text-xs sm:text-sm text-slate-800 placeholder-slate-400 font-medium truncate"
+          />
+          <kbd className="hidden md:inline-flex items-center space-x-0.5 px-2 py-0.5 text-[10px] font-mono font-semibold text-slate-400 bg-white rounded border border-slate-200 shadow-2xs shrink-0">
+            <span>Ctrl</span>
+            <span>K</span>
+          </kbd>
+        </div>
       </div>
       
       {/* Right Controls */}
-      <div className="flex items-center space-x-3 sm:space-x-4">
+      <div className="flex items-center space-x-2 sm:space-x-4">
         {/* Real-time Status Badge */}
         <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-semibold">
           <span className="relative flex h-2 w-2">
@@ -210,7 +223,7 @@ const TopNav = () => {
 
           {/* Notifications Dropdown Panel */}
           {notificationsOpen && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden z-50 animate-in">
+            <div className="fixed inset-x-3 top-18 sm:absolute sm:inset-auto sm:right-0 sm:mt-2 w-auto sm:w-96 max-w-sm sm:max-w-md mx-auto sm:mx-0 bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden z-50 animate-in">
               {/* Header */}
               <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
                 <div className="flex items-center space-x-2">
@@ -374,7 +387,7 @@ const TopNav = () => {
 
           {/* Modern Profile Dropdown Card */}
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 text-slate-800 z-50 animate-in">
+            <div className="fixed inset-x-3 top-18 sm:absolute sm:inset-auto sm:right-0 sm:mt-2 w-auto sm:w-72 max-w-sm mx-auto sm:mx-0 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 text-slate-800 z-50 animate-in">
               {/* User Overview Header */}
               <div className="p-3 bg-gradient-to-br from-slate-50 to-blue-50/50 rounded-xl border border-slate-100 mb-1">
                 <div className="flex items-center space-x-3">

@@ -240,7 +240,7 @@ const Reports = () => {
         
         {/* Quick Stats Bar */}
         {!loading && data.length > 0 && (
-          <div className="px-6 py-3 bg-purple-50/50 border-b border-purple-100 flex gap-8">
+          <div className="px-6 py-3 bg-purple-50/50 border-b border-purple-100 flex flex-wrap gap-4 sm:gap-8">
              <p className="text-sm font-medium text-slate-600">Total Rows: <span className="font-bold text-slate-800 ml-1">{data.length}</span></p>
              <p className="text-sm font-medium text-slate-600">Total Units: <span className="font-bold text-slate-800 ml-1">{totalItems.toLocaleString()}</span></p>
              {totalValue !== null && (
@@ -252,7 +252,7 @@ const Reports = () => {
         {/* Data Table */}
         <div className="overflow-x-auto min-h-[400px]">
           {loading ? <LoadingState message="Querying database..." /> : data.length > 0 ? (
-            <table className="w-full text-sm text-left">
+            <table className="w-full min-w-[700px] text-sm text-left">
               <thead className="text-xs text-slate-500 bg-white uppercase border-b border-slate-200">
                 {reportType === 'inventory' ? (
                   <tr>

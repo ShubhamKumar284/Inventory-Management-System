@@ -140,30 +140,30 @@ const Inventory = () => {
           <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Inventory Management</h1>
           <p className="text-slate-500 mt-1">Manage your warehouse stock, pricing, and locations.</p>
         </div>
-        <button onClick={openAddModal} className="flex items-center justify-center px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold shadow-sm shadow-blue-200 hover:bg-blue-700 hover:shadow-md transition-all active:scale-95">
+        <button onClick={openAddModal} className="flex items-center justify-center px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold shadow-sm shadow-blue-200 hover:bg-blue-700 hover:shadow-md transition-all active:scale-95 self-start md:self-auto">
           <Plus size={18} strokeWidth={3} className="mr-2" /> Add Item
         </button>
       </div>
 
       <Card className="p-0 overflow-hidden shadow-sm">
-        <div className="p-5 border-b border-slate-200 bg-white flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div className="p-4 sm:p-5 border-b border-slate-200 bg-white flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="flex items-center bg-slate-50 rounded-xl px-4 py-2.5 w-full md:w-96 border border-slate-200 focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-50 transition-all">
-            <Search size={18} className="text-slate-400" />
+            <Search size={18} className="text-slate-400 shrink-0" />
             <input 
               type="text"
               placeholder="Search by SKU or Name..."
               className="bg-transparent border-none outline-none ml-3 w-full text-sm text-slate-700 placeholder-slate-400"
             />
           </div>
-          <div className="flex gap-3 w-full md:w-auto">
-            <button className="flex items-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm">
-              <Filter size={16} className="mr-2 text-slate-500" /> Filters
+          <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-3 w-full md:w-auto">
+            <button className="flex items-center justify-center px-3 sm:px-4 py-2 sm:py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm flex-1 sm:flex-initial">
+              <Filter size={16} className="mr-1.5 sm:mr-2 text-slate-500" /> Filters
             </button>
-            <button onClick={fetchProducts} className="flex items-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm">
-              <RefreshCw size={16} className="mr-2 text-slate-500" /> Refresh
+            <button onClick={fetchProducts} className="flex items-center justify-center px-3 sm:px-4 py-2 sm:py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm flex-1 sm:flex-initial">
+              <RefreshCw size={16} className="mr-1.5 sm:mr-2 text-slate-500" /> Refresh
             </button>
-            <button onClick={exportToCSV} className="flex items-center px-4 py-2.5 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl text-sm font-semibold hover:bg-indigo-100 transition-colors shadow-sm">
-              <Download size={16} className="mr-2" /> Export CSV
+            <button onClick={exportToCSV} className="flex items-center justify-center px-3 sm:px-4 py-2 sm:py-2.5 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-xl text-xs sm:text-sm font-semibold hover:bg-indigo-100 transition-colors shadow-sm flex-1 sm:flex-initial">
+              <Download size={16} className="mr-1.5 sm:mr-2" /> Export
             </button>
           </div>
         </div>
