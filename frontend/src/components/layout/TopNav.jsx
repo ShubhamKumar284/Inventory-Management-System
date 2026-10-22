@@ -184,21 +184,24 @@ const TopNav = () => {
         {/* Notifications Dropdown Container */}
         <div className="relative" ref={notificationsRef}>
           <button 
+            id="notification-bell-btn"
             type="button"
-            onClick={() => {
-              setNotificationsOpen(!notificationsOpen);
+            onClick={(e) => {
+              e.stopPropagation();
+              setNotificationsOpen(prev => !prev);
               setDropdownOpen(false);
             }}
             title="System Notifications"
-            className={`relative p-2.5 rounded-xl transition-all border active:scale-95 cursor-pointer ${
+            aria-label="Toggle notifications panel"
+            className={`relative p-2.5 rounded-xl transition-all border active:scale-95 cursor-pointer select-none ${
               notificationsOpen 
-                ? 'bg-blue-50 text-blue-600 border-blue-200' 
+                ? 'bg-blue-50 text-blue-600 border-blue-200 shadow-xs ring-2 ring-blue-500/20' 
                 : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 border-transparent hover:border-slate-200'
             }`}
           >
             <Bell size={18} />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+              <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 pointer-events-none">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600 border-2 border-white"></span>
               </span>
@@ -207,7 +210,7 @@ const TopNav = () => {
 
           {/* Notifications Dropdown Panel */}
           {notificationsOpen && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 animate-in">
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden z-50 animate-in">
               {/* Header */}
               <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
                 <div className="flex items-center space-x-2">
