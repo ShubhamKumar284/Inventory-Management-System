@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Layout from './components/layout/Layout';
@@ -28,9 +28,11 @@ function App() {
               <Route path="suppliers" element={<Suppliers />} />
               <Route path="warehouses" element={<Warehouses />} />
               <Route path="reports" element={<Reports />} />
-              {/* More routes will go here */}
             </Route>
           </Route>
+
+          {/* Catch-all route to redirect unknown or nested paths */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
