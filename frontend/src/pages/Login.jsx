@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import { GoogleLogin } from '@react-oauth/google';
 import { 
   Package, Lock, Mail, User as UserIcon, ArrowRight, Sparkles, 
@@ -24,11 +25,23 @@ const Login = () => {
 
   const from = location.state?.from?.pathname || '/';
 
+  // Pre-warm backend immediately on login page mount so sleeping free-tier servers (Render) wake up before user clicks login
+  useEffect(() => {
+    api.get('/health').catch(() => {
+      // Non-blocking ping, failures ignored silently
+    });
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
     setLoadingMessage(isLogin ? 'Authenticating your session...' : 'Setting up your workspace...');
+
+    // Reassure user if backend is spinning up from cold sleep
+    const coldTimer = setTimeout(() => {
+      setLoadingMessage('Connecting to cloud database (waking up server, please hold on ~10s)...');
+    }, 2500);
 
     try {
       if (isLogin) {
@@ -36,10 +49,13 @@ const Login = () => {
       } else {
         await register(name, email, password);
       }
+      clearTimeout(coldTimer);
       navigate(from, { replace: true });
     } catch (err) {
+      clearTimeout(coldTimer);
       setError(err.response?.data?.message || 'Authentication failed. Please check your credentials.');
     } finally {
+      clearTimeout(coldTimer);
       setIsLoading(false);
       setLoadingMessage('');
     }
@@ -60,12 +76,20 @@ const Login = () => {
     setIsLoading(true);
     setLoadingMessage('Logging in as System Administrator...');
 
+    // If server is asleep on free hosting (e.g. Render), update message after 2.5s
+    const coldTimer = setTimeout(() => {
+      setLoadingMessage('Waking up cloud server (free tier spin-up, please wait ~10-15s)...');
+    }, 2500);
+
     try {
       await login('admin@example.com', 'password123');
+      clearTimeout(coldTimer);
       navigate(from, { replace: true });
     } catch (err) {
+      clearTimeout(coldTimer);
       setError(err.response?.data?.message || 'Admin login failed. Please verify server connection.');
     } finally {
+      clearTimeout(coldTimer);
       setIsLoading(false);
       setLoadingMessage('');
     }

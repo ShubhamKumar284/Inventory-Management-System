@@ -1,0 +1,10 @@
+{
+  "name": "smart-inventory-system",
+  "private": true,
+  "version": "1.0.0",
+  "description": "SmartInventory - Real-Time Warehouse & Stock Management Platform",
+  "scripts": {
+    "build": "npm --prefix frontend install && npm --prefix frontend run build",
+    "vercel-build": "npm --prefix frontend install && npm --prefix frontend run build"
+  }
+}
